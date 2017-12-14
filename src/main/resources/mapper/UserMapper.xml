@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.web.mapper.UserMapper" >
+    <resultMap id="BaseResultMap" type="com.web.model.User" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="open_id" property="openId" jdbcType="VARCHAR" />
+        <result column="user_account" property="userAccount" jdbcType="VARCHAR" />
+        <result column="user_pass" property="userPass" jdbcType="VARCHAR" />
+        <result column="deposit_pass" property="depositPass" jdbcType="VARCHAR" />
+        <result column="user_pic" property="userPic" jdbcType="VARCHAR" />
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="sex" property="sex" jdbcType="CHAR" />
+        <result column="birthday" property="birthday" jdbcType="VARCHAR" />
+        <result column="card_type" property="cardType" jdbcType="CHAR" />
+        <result column="card_name" property="cardName" jdbcType="VARCHAR" />
+        <result column="card_effective_time" property="cardEffectiveTime" jdbcType="TIMESTAMP" />
+        <result column="card_invalid_time" property="cardInvalidTime" jdbcType="TIMESTAMP" />
+        <result column="my_agent_id" property="myAgentId" jdbcType="VARCHAR" />
+        <result column="my_agent_name" property="myAgentName" jdbcType="VARCHAR" />
+        <result column="coach" property="coach" jdbcType="CHAR" />
+        <result column="coach_space" property="coachSpace" jdbcType="CHAR" />
+        <result column="agent" property="agent" jdbcType="CHAR" />
+        <result column="cooperate" property="cooperate" jdbcType="CHAR" />
+        <result column="lock_money" property="lockMoney" jdbcType="DECIMAL" />
+        <result column="money" property="money" jdbcType="DECIMAL" />
+        <result column="province" property="province" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="area" property="area" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="last_login_time" property="lastLoginTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="order_num" property="orderNum" jdbcType="VARCHAR" />
+        <result column="order_money" property="orderMoney" jdbcType="DECIMAL" />
+        <result column="real_money" property="realMoney" jdbcType="DECIMAL" />
+        <result column="product_id" property="productId" jdbcType="INTEGER" />
+        <result column="product_name" property="productName" jdbcType="VARCHAR" />
+        <result column="product_money" property="productMoney" jdbcType="DECIMAL" />
+        <result column="resource_square_pic" property="resourceSquarePic" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, open_id, user_pass, user_pic, deposit_pass, nick_name, mobile, email,
+        sex, birthday, card_type, card_effective_time, card_invalid_time, my_agent_id,my_agent_name, coach, agent, cooperate,
+        lock_money, money, last_login_time,create_time,province,city,area,address,
+        CASE
+        WHEN agent!='na' and coach!='nc' THEN '合作用户/认证教练'
+        WHEN cooperate!='nb' and coach!='nc' THEN '合作用户/认证教练'
+        WHEN agent!='na' THEN '合作用户'
+        WHEN cooperate!='nb' THEN '合作用户'
+        WHEN coach!='nc' THEN '认证教练'
+        WHEN card_type='fc' THEN '五年卡用户'
+        WHEN card_type='fc' THEN '五年卡用户'
+        WHEN card_type='tc' THEN '两年卡用户'
+        WHEN card_type='yc' THEN '年卡用户'
+        WHEN card_type='bc' THEN '半年卡用户'
+        WHEN card_type='sc' THEN '季卡用户'
+        WHEN card_type='mc' THEN '月卡用户'
+        ELSE '普通用户' END AS card_name
+    </sql>
+
+    <select id="getUserPage" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        select
+        <include refid="Base_Column_List" />
+        from mooc_golf_user
+        where 1=1
+        <if test="nickName != null and nickName != ''" >
+            and nick_name LIKE CONCAT(CONCAT('%', #{nickName,jdbcType=VARCHAR}), '%')
+        </if>
+        <if test="mobile != null and mobile != ''" >
+            and mobile = #{mobile,jdbcType=VARCHAR}
+        </if>
+        <if test="cardType != null and cardType != ''" >
+            and card_type = #{cardType,jdbcType=VARCHAR}
+        </if>
+        <if test="cardEffectiveTime != null and cardEffectiveTime != ''" >
+            and card_effective_time &lt;= #{cardEffectiveTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="cardInvalidTime != null and cardInvalidTime != ''" >
+            and card_invalid_time &gt;= #{cardInvalidTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimes != null and createTimes != ''" >
+            and create_time LIKE CONCAT(CONCAT('%', #{createTimes,jdbcType=TIMESTAMP}), '%')
+        </if>
+        <if test="id != null and id != ''" >
+            and id = #{id}
+        </if>
+        <if test="openId != null and openId != ''" >
+            and open_id = #{openId}
+        </if>
+
+    </select>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from mooc_golf_user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <insert id="insert" parameterType="com.web.model.User" >
+        insert into mooc_golf_user (id,
+        user_pass, user_pic, nick_name,
+        mobile, email,
+        sex, birthday, card_type,
+        my_agent_id, my_agent_name, last_login_time, create_time, province, city, area, open_id
+        )
+        values (#{id,jdbcType=INTEGER},
+        #{userPass,jdbcType=VARCHAR}, #{userPic,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR},
+        #{mobile,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR},
+        #{sex,jdbcType=CHAR}, #{birthday,jdbcType=VARCHAR}, #{cardType,jdbcType=CHAR},
+        #{myAgentId,jdbcType=VARCHAR}, #{myAgentName,jdbcType=VARCHAR},
+        #{lastLoginTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP},
+        #{province,jdbcType=VARCHAR},#{city,jdbcType=VARCHAR},#{area,jdbcType=VARCHAR},#{openId,jdbcType=VARCHAR}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.web.model.User" >
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID();
+        </selectKey>
+        insert into mooc_golf_user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="userPass != null" >
+                user_pass,
+            </if>
+            <if test="userPic != null" >
+                user_pic,
+            </if>
+            <if test="nickName != null" >
+                nick_name,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="email != null" >
+                email,
+            </if>
+            <if test="sex != null" >
+                sex,
+            </if>
+            <if test="birthday != null" >
+                birthday,
+            </if>
+            <if test="cardType != null" >
+                card_type,
+            </if>
+            <if test="myAgentId != null" >
+                my_agent_id,
+            </if>
+            <if test="myAgentName != null" >
+                my_agent_name,
+            </if>
+            <if test="lastLoginTime != null" >
+                last_login_time,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="province != null" >
+                province,
+            </if>
+            <if test="city != null" >
+                city,
+            </if>
+            <if test="area != null" >
+                area,
+            </if>
+            <if test="openId != null" >
+                open_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="userPass != null" >
+                #{userPass,jdbcType=VARCHAR},
+            </if>
+            <if test="userPic != null" >
+                #{userPic,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null" >
+                #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                #{sex,jdbcType=CHAR},
+            </if>
+            <if test="birthday != null" >
+                #{birthday,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null" >
+                #{cardType,jdbcType=CHAR},
+            </if>
+            <if test="myAgentId != null" >
+                #{myAgentId,jdbcType=VARCHAR},
+            </if>
+            <if test="myAgentName != null" >
+                #{myAgentName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastLoginTime != null" >
+                #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="province != null" >
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="area != null" >
+                #{area,jdbcType=VARCHAR},
+            </if>
+            <if test="openId != null" >
+                #{openId,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.web.model.User" >
+        update mooc_golf_user
+        <set >
+            <if test="userPass != null" >
+                user_pass = #{userPass,jdbcType=VARCHAR},
+            </if>
+            <if test="depositPass != null" >
+                deposit_pass = #{depositPass,jdbcType=VARCHAR},
+            </if>
+            <if test="userPic != null" >
+                user_pic = #{userPic,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null" >
+                nick_name = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                sex = #{sex,jdbcType=CHAR},
+            </if>
+            <if test="birthday != null" >
+                birthday = #{birthday,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null" >
+                card_type = #{cardType,jdbcType=CHAR},
+            </if>
+            <if test="myAgentId != null" >
+                my_agent_id = #{myAgentId,jdbcType=VARCHAR},
+            </if>
+            <if test="myAgentName != null" >
+                my_agent_name = #{myAgentName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastLoginTime != null" >
+                last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cardEffectiveTime != null" >
+                card_effective_time = #{cardEffectiveTime,jdbcType=VARCHAR},
+            </if>
+            <if test="cardInvalidTime != null" >
+                card_invalid_time = #{cardInvalidTime,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null" >
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null" >
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="area != null" >
+                area = #{area,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null" >
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="openId != null" >
+                open_id = #{openId,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateLockMoneyByPrimaryKey" parameterType="com.web.model.User" >
+        update mooc_golf_user
+        <set >
+            <if test="lockMoney != null" >
+                lock_money = lock_money+#{lockMoney,jdbcType=DECIMAL}
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.web.model.User" >
+        update mooc_golf_user
+        set user_pass = #{userPass,jdbcType=VARCHAR},
+        user_pic = #{userPic,jdbcType=VARCHAR},
+        nick_name = #{nickName,jdbcType=VARCHAR},
+        mobile = #{mobile,jdbcType=VARCHAR},
+        email = #{email,jdbcType=VARCHAR},
+        sex = #{sex,jdbcType=CHAR},
+        birthday = #{birthday,jdbcType=VARCHAR},
+        card_type = #{cardType,jdbcType=CHAR},
+        my_agent_id = #{myAgentId,jdbcType=VARCHAR},
+        my_agent_name = #{myAgentName,jdbcType=VARCHAR},
+        last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+        province = #{province},
+        city = #{city},
+        area = #{area},
+        address = #{address},
+        open_id = #{openId}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateByMobile" parameterType="com.web.model.User" >
+        update mooc_golf_user
+        <set >
+            <if test="userPass != null" >
+                user_pass = #{userPass,jdbcType=VARCHAR},
+            </if>
+            <if test="userPic != null" >
+                user_pic = #{userPic,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null" >
+                nick_name = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                mobile = #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null" >
+                sex = #{sex,jdbcType=CHAR},
+            </if>
+            <if test="birthday != null" >
+                birthday = #{birthday,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null" >
+                card_type = #{cardType,jdbcType=CHAR},
+            </if>
+            <if test="myAgentId != null" >
+                my_agent_id = #{myAgentId,jdbcType=VARCHAR},
+            </if>
+            <if test="myAgentName != null" >
+                my_agent_name = #{myAgentName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastLoginTime != null" >
+                last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="province != null" >
+                province = #{province},
+            </if>
+            <if test="city != null" >
+                city = #{city},
+            </if>
+            <if test="area != null" >
+                area = #{area},
+            </if>
+            <if test="address != null" >
+                address = #{address},
+            </if>
+            <if test="openId != null" >
+                open_id = #{openId},
+            </if>
+        </set>
+        where mobile = #{mobile}
+    </update>
+
+    <select id="getUserCoachList" resultMap="BaseResultMap" parameterType="com.web.model.User">
+        select
+        <include refid="Base_Column_List" />
+        from mooc_golf_user where 1=1 and coach != 'nc'
+        <!-- 	    order by  -->
+    </select>
+
+    <select id="getCollectionUserPage" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        u.id,u.user_pic,u.nick_name,u.area
+        FROM mooc_golf_collection c,mooc_golf_user u
+        WHERE c.collection_type=2 AND  c.status=1
+        <if test="flag != null and flag != ''" >
+            <if test="flag == 'jl'">
+                and c.collection_id=u.id
+                and c.user_id = #{id}
+            </if>
+            <if test="flag == 'xy'">
+                AND c.user_id=u.id
+                AND c.collection_id = #{id}
+            </if>
+        </if>
+    </select>
+
+    <select id="getVipUserPage" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        id,
+        nick_name,
+        CASE
+        WHEN card_type='yc' THEN '年卡用户'
+        WHEN card_type='bc' THEN '半年卡用户'
+        WHEN card_type='sc' THEN '季卡用户'
+        WHEN card_type='mc' THEN '月卡用户'
+        ELSE '普通用户' END AS card_type,
+        card_effective_time,
+        card_invalid_time
+        FROM mooc_golf_user
+        WHERE card_type !='wc'
+        AND my_agent_id LIKE CONCAT(CONCAT('%', #{myAgentId,jdbcType=VARCHAR}), '%')
+    </select>
+
+    <select id="getPerformance" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        CASE WHEN SUM(o.order_money) IS NULL THEN 0 ELSE SUM(o.order_money) END AS order_money,
+        CASE WHEN SUM(o.real_money) IS NULL THEN 0 ELSE SUM(o.real_money) END AS real_money,
+        COUNT(o.order_id) AS order_num
+        FROM mooc_golf_user u,mooc_golf_order o
+        WHERE u.id=o.create_by
+        AND o.pay_status=1
+        AND o.order_type=#{orderType,jdbcType=VARCHAR}
+        AND u.my_agent_id LIKE CONCAT(CONCAT('%', #{myAgentId,jdbcType=VARCHAR}), '%')
+        ORDER BY o.create_time
+    </select>
+
+    <select id="getFinanciaDetailsPage" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        op.product_id,
+        op.product_name,
+        op.product_money,
+        op.create_time,
+        r.resource_square_pic
+        FROM mooc_golf_order o,mooc_golf_order_product op,mooc_golf_resource r
+        WHERE o.order_id = op.order_id AND o.pay_status=1 AND op.product_id = r.id AND op.product_type=6
+        AND op.create_by=#{id,jdbcType=INTEGER}
+    </select>
+    <select id="getMyCourse" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        CASE WHEN SUM(op.product_money)>0 THEN SUM(op.product_money) ELSE 0 END AS product_money
+        FROM mooc_golf_order o,mooc_golf_order_product op,mooc_golf_resource r
+        WHERE o.order_id = op.order_id AND o.pay_status=1 AND op.product_id = r.id AND op.product_type=6
+        AND r.create_by=#{id,jdbcType=INTEGER}
+    </select>
+    <select id="getUserResourceTime" resultMap="BaseResultMap" parameterType="com.web.model.User" >
+        SELECT
+        o.create_time
+        FROM mooc_golf_order o,mooc_golf_order_product op
+        WHERE o.order_id = op.order_id AND o.pay_status=1 AND o.order_type=6 AND op.product_id=#{productId,jdbcType=INTEGER} AND o.create_by=#{id,jdbcType=INTEGER} ORDER BY o.create_time desc
+    </select>
+</mapper>
